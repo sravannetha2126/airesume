@@ -1,6 +1,6 @@
 import streamlit as st
 import re
-from sentence_transformers import SentenceTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # -------------------------------
@@ -70,10 +70,11 @@ st.write("### Analyze your resume using AI & get job recommendations")
 # Load Model
 # -------------------------------
 @st.cache_resource
-def load_model():
-    return SentenceTransformer('all-MiniLM-L6-v2')
-
-model = load_model()
+def semantic_match(resume_text, job_text):
+    vectorizer = TfidfVectorizer()
+    vectors = vectorizer.fit_transform([resume_text, job_text])
+    similarity = cosine_similarity(vectors[0:1], vectors[1:2])
+    return round(similarity[0][0] * 100, 2)
 
 # -------------------------------
 # Job Roles
@@ -156,5 +157,6 @@ if st.button("✨ Analyze Resume"):
         match = semantic_match(resume_text, " ".join(skills))
         st.write(f"### {role}")
         st.write(f"Match: {match}%")
+
 
     st.markdown('</div>', unsafe_allow_html=True)
